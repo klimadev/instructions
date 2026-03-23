@@ -1,132 +1,98 @@
-🎯 Objetivo
-Maximizar velocidade e qualidade de desenvolvimento por meio de edições amplas, validação contínua e autocorreção automática, sem depender de interação humana ou processos bloqueantes.
+# AGENTS.md
 
-🔥 Estratégia de Edição
-Regra 1 — Edição Máxima Primeiro
-Sempre tentar editar o arquivo inteiro de uma vez.
+## Objetivo
+Maximizar velocidade de entrega com segurança, resolvendo a causa raiz com o menor custo total de iteração.
 
+## Princípio Central
+Não priorize o maior diff.
+Priorize o menor diff suficiente para corrigir completamente o problema.
+A mudança pode ser multi-arquivo se isso reduzir retrabalho.
+
+## Política de Escopo
+Escolha o escopo antes de editar:
+
+### Use patch localizado quando:
+- a causa raiz estiver clara e isolada
+- a mudança afetar 1 módulo, componente ou função
+- não houver contrato compartilhado sendo alterado
+
+### Use edição multi-arquivo quando:
+- houver tipos, schemas, serviços, rotas, hooks ou contratos cruzados
+- corrigir só um arquivo criar inconsistência
+- a mudança exigir atualização de chamadas, testes ou tipos relacionados
+
+### Reescreva arquivo inteiro apenas quando:
+- o arquivo for pequeno
+- mais de 30% do arquivo precisar mudar
+- a estrutura atual impedir uma correção segura e legível
+
+## Limites Operacionais
+- Prefira 1 a 4 arquivos por iteração
+- 5 a 8 arquivos apenas se houver dependência real
+- Evite mudanças amplas sem necessidade arquitetural
+- Não faça refactor oportunista fora do escopo
+
+## Preflight Obrigatório
+Antes de editar:
+1. Identifique a causa raiz
+2. Localize os arquivos diretamente afetados
+3. Verifique contratos, tipos e imports relacionados
+4. Descubra os scripts reais do projeto
+5. Escolha o menor escopo suficiente
+
+## Estratégia de Edição
+- Aplique mudanças relacionadas na mesma iteração
+- Preserve padrões já usados no repositório
+- Não renomeie APIs públicas sem necessidade
+- Não altere arquivos não relacionados
+- Prefira mudanças reversíveis e fáceis de validar
+
+## Validação por Nível de Risco
+
+### Baixo risco
+Ex.: texto, markup, estilo local, ajuste pequeno de UI
+- revisão lógica local
+- lint/typecheck local se disponível
+
+### Médio risco
+Ex.: lógica de componente, hook, service isolado
+- lint
+- testes direcionados se existirem
+- build apenas se necessário
+
+### Alto risco
+Ex.: contratos compartilhados, schema, rotas, auth, estado global, config, build
+- lint
+- testes
+- build completo
+
+## Comandos Proibidos
+- dev servers persistentes
+- watchers
+- comandos interativos ou bloqueantes
+
+## Comandos Permitidos
+- lint
+- typecheck
+- testes direcionados
+- build
+- comandos equivalentes da stack
+
+## Loop de Correção
 Se falhar:
+1. corrija a causa principal
+2. corrija erros relacionados do mesmo escopo
+3. revalide no menor escopo suficiente
+4. só rode validação completa quando o risco justificar
 
-Reduzir para metade lógica do arquivo.
+## Budget de Iteração
+- Até 2 tentativas amplas por tarefa
+- Se falhar, reduza escopo
+- Não entre em refactor em cascata
 
-Depois para blocos funcionais.
-
-Só em último caso editar linhas isoladas.
-
-Nunca começar pequeno por padrão.
-
-Regra 2 — Multiarquivo Sempre que Possível
-Se a mudança impactar mais de um arquivo:
-
-Editar todos os arquivos relevantes na mesma iteração.
-
-Evitar commits mentais parciais.
-
-🧪 Estratégia de Validação
-Regra 3 — Nunca Rodar Processos Bloqueantes
-❌ Proibido:
-
-npm run dev
-
-servidores persistentes
-
-watchers
-
-qualquer comando que exija interação humana
-
-✅ Permitido:
-
-npm run build
-
-npm test
-
-npm run lint
-
-comandos equivalentes em qualquer stack
-
-Regra 4 — Pipeline de Validação Obrigatório
-Após qualquer edição, executar na ordem:
-
-Lint
-
-Apenas se o build não já executar lint automaticamente.
-
-Build
-
-Revisão Lógica Manual
-
-Mesmo com build verde, revisar:
-
-Fluxos principais
-
-Estados críticos
-
-Integrações
-
-Casos de borda óbvios
-
-🛠️ Estratégia de Correção
-Regra 5 — Falhou? Corrija Tudo
-Se qualquer etapa falhar:
-
-Corrigir o erro detectado
-
-Procurar erros relacionados
-
-Não assumir que o primeiro erro era o único
-
-Repetir o pipeline completo após correção
-
-🔁 Estratégia de Iteração
-Regra 6 — Loop Autônomo
-O agente deve operar em loop até:
-
-Build passar
-
-Lint passar (se aplicável)
-
-Revisão lógica indicar coerência funcional
-
-Sem pedir confirmação humana no meio do processo.
-
-🧩 Estratégia de Stack-Agnosticismo
-Estas regras se aplicam a:
-
-Frontend, backend, mobile, infra
-
-Qualquer linguagem ou framework
-
-Qualquer sistema de build/test/lint
-
-O agente deve inferir os comandos corretos a partir do projeto.
-
-🧠 Mentalidade do Agente
-Priorizar velocidade com segurança
-
-Preferir mudanças grandes e reversíveis
-
-Tratar build verde como necessário, mas não suficiente
-
-Pensar como um engenheiro sênior, não como autocomplete
-
-🧪 Exemplo de Ciclo Ideal
-Edita múltiplos arquivos inteiros
-
-Roda lint (se necessário)
-
-Roda build
-
-Analisa lógica
-
-Corrige problemas detectados
-
-Repete até estabilidade
-
-🧨 Anti-Padrões Proibidos
-“Vou mudar só essa linha”
-
-“Build passou, então está certo”
-
-“Vou esperar o usuário testar”
-
-“Vou rodar dev server”
+## Anti-padrões
+- mudar arquivos demais sem necessidade
+- corrigir sintoma sem causa raiz
+- usar build verde como prova suficiente
+- esperar o usuário testar algo obviamente verificável
+- fazer refactor cosmético fora do escopo
